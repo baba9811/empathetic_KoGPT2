@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader, Dataset
 from transformers.optimization import AdamW, get_cosine_schedule_with_warmup
 from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel
 
-parser = argparse.ArgumentParser(description='Simsimi based on KoGPT-2')
+parser = argparse.ArgumentParser(description='Empathetic chatbot based on KoGPT-2')
 
 parser.add_argument('--chat',
                     action='store_true',
@@ -69,8 +69,8 @@ class CharDataset(Dataset):
 
     def __getitem__(self, idx):
         turn = self._data.iloc[idx]
-        q = turn['Q']
-        a = turn['A']
+        q = turn['context']
+        a = turn['response']
         sentiment = str(turn['label'])
         q_toked = self.tokenizer.tokenize(self.q_token + q + \
                                           self.sent_token + sentiment)   
@@ -184,7 +184,7 @@ class KoGPT2Chat(LightningModule):
         return torch.LongTensor(data), torch.LongTensor(mask), torch.LongTensor(label)
 
     def train_dataloader(self):
-        data = pd.read_csv('Chatbot_data/ChatbotData.csv')
+        data = pd.read_csv('Chatbot_data/Data.csv')
         self.train_set = CharDataset(data, max_len=self.hparams.max_len)
         train_dataloader = DataLoader(
             self.train_set, batch_size=self.hparams.batch_size, num_workers=2,
